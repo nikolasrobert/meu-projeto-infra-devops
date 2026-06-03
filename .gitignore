@@ -1,0 +1,20 @@
+# Ambientes Virtuais Python
+venv
+.env
+.venv
+env
+__pycache__
+.pyc
+
+# Dependências do React  Node
+node_modules
+dist
+build
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos do Cursor  VS Code
+.vscode
+.cursor
