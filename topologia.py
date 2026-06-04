@@ -69,12 +69,38 @@ class MyTopo(Topo):
         self.addLink(r2, r3, intfName1='r2-eth2', params1={'ip': '10.10.0.1/16'}, intfName2='r3-eth2', params2={'ip': '10.10.0.2/16'})
 
 # ==========================================
-# EXECUÇÃO DA REDE
+# EXECUÇÃO DA REDE E ROTEAMENTO
 # ==========================================
 if __name__ == '__main__':
     setLogLevel('info')
     topo = MyTopo()
     net = Mininet(topo=topo)
     net.start()
+
+    info("*** Configurando Roteamento Estático...\n")
+    fw = net.get('fw')
+    r1 = net.get('r1')
+    r2 = net.get('r2')
+    r3 = net.get('r3')
+
+    # FW -> sabe chegar em Servicos (13.0) e DB (53.0) através do R1 (133.254)
+    fw.cmd('ip route add 192.168.13.0/24 via 192.168.133.254')
+    fw.cmd('ip route add 192.168.53.0/24 via 192.168.133.254')
+
+    # R1 -> sabe chegar na DMZ via FW; Servicos via R2; DB via R3
+    r1.cmd('ip route add 172.27.0.0/12 via 192.168.133.253')
+    r1.cmd('ip route add 192.168.13.0/24 via 10.3.0.2')
+    r1.cmd('ip route add 192.168.53.0/24 via 10.8.0.2')
+
+    # R2 -> sabe chegar em Clientes e DMZ via R1; DB via R3
+    r2.cmd('ip route add 192.168.133.0/24 via 10.3.0.1')
+    r2.cmd('ip route add 172.27.0.0/12 via 10.3.0.1')
+    r2.cmd('ip route add 192.168.53.0/24 via 10.10.0.2')
+
+    # R3 -> sabe chegar em Clientes e DMZ via R1; Servicos via R2
+    r3.cmd('ip route add 192.168.133.0/24 via 10.8.0.1')
+    r3.cmd('ip route add 172.27.0.0/12 via 10.8.0.1')
+    r3.cmd('ip route add 192.168.13.0/24 via 10.10.0.1')
+
     CLI(net)
     net.stop()
