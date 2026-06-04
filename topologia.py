@@ -102,5 +102,13 @@ if __name__ == '__main__':
     r3.cmd('ip route add 172.27.0.0/12 via 10.8.0.1')
     r3.cmd('ip route add 192.168.13.0/24 via 10.10.0.1')
 
+
+    info("*** Configurando Regras de Firewall (iptables)...\n")
+    fw.cmd('iptables -A FORWARD -p icmp -s 172.27.0.1 -d 192.168.0.0/16 -j DROP')
+    fw.cmd('iptables -A FORWARD -p tcp -s 172.27.0.1 -d 192.168.13.3 --dport 8000 -j ACCEPT')
+    fw.cmd('iptables -A FORWARD -p tcp -s 172.27.0.1 -d 192.168.13.2 --dport 21 -j ACCEPT')
+    fw.cmd('iptables -A FORWARD -p tcp -s 172.27.0.1 -d 192.168.13.1 --dport 2049 -j ACCEPT')
+    fw.cmd('iptables -A FORWARD -s 172.27.0.1 -d 192.168.0.0/16 -j DROP')
+
     CLI(net)
     net.stop()
